@@ -1,6 +1,7 @@
 package pingdom
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -24,6 +25,7 @@ type Client struct {
 	Maintenances *MaintenanceService
 	Probes       *ProbeService
 	Teams        *TeamService
+	TmsChecks    *TmsCheckService
 }
 
 // ClientConfig represents a configuration for a pingdom client.
@@ -69,6 +71,7 @@ func NewClientWithConfig(config ClientConfig) (*Client, error) {
 	c.Maintenances = &MaintenanceService{client: c}
 	c.Probes = &ProbeService{client: c}
 	c.Teams = &TeamService{client: c}
+	c.TmsChecks = &TmsCheckService{client: c}
 	return c, nil
 }
 
@@ -97,20 +100,39 @@ func (pc *Client) NewRequest(method string, rsc string, params map[string]string
 	return req, err
 }
 
-// NewJSONRequest makes a new HTTP Request.  The method param should be an HTTP method in
-// all caps such as GET, POST, PUT, DELETE.  The rsc param should correspond with
-// a restful resource.  Params should be a json formatted string.
-func (pc *Client) NewJSONRequest(method string, rsc string, params string) (*http.Request, error) {
+// NewJsonRequest makes a new HTTP Request with Json payload. The method param should be an HTTP method in
+// all caps such as GET, POST, PUT, DELETE. The rsc param should correspond with
+// a restful resource.  Params can be passed in as a map of strings
+// Usually users of the client can use one of the convenience methods such as
+// ListChecks, etc but this method is provided to allow for making other
+// API calls that might not be built in.
+func (pc *Client) NewJsonRequest(method string, rsc string, params map[string]string, body interface{}) (*http.Request, error) {
 	baseURL, err := url.Parse(pc.BaseURL.String() + rsc)
 	if err != nil {
 		return nil, err
 	}
 
-	reqBody := strings.NewReader(params)
+	if params != nil {
+		ps := url.Values{}
+		for k, v := range params {
+			ps.Set(k, v)
+		}
+		baseURL.RawQuery = ps.Encode()
+	}
+	jsonBody, err := json.Marshal(body)
 
-	req, err := http.NewRequest(method, baseURL.String(), reqBody)
-	req.Header.Add("Authorization", "Bearer "+pc.APIToken)
-	req.Header.Add("Content-Type", "application/json")
+	//todo remove debug code
+	fmt.Println(string(jsonBody))
+
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(method, baseURL.String(), bytes.NewBuffer(jsonBody))
+	if req != nil {
+		req.Header.Add("Authorization", "Bearer "+pc.APIToken)
+		req.Header.Add("Content-Type", "application/json")
+	}
 	return req, err
 }
 
