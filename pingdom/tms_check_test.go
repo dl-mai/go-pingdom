@@ -86,7 +86,7 @@ func TestTmsCheckServiceRead(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/tms/checks/85975", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/tms/check/85975", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		fmt.Fprint(w, `{
     "check": {
@@ -158,7 +158,7 @@ func TestTmsCheckServiceUpdate(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/tms/checks/12345", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/tms/check/12345", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
 		fmt.Fprint(w, `{
   "active": true,
@@ -289,7 +289,7 @@ func TestTmsCheckServiceDelete(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/tms/checks/12345", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/tms/check/12345", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
 		fmt.Fprint(w, `{
 "message": "Deletion of check 12345 was successful"

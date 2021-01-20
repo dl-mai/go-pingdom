@@ -260,7 +260,7 @@ func (cs *TmsCheckService) Create(check TmsCheck) (*TmsCheckResponse, error) {
 
 // ReadCheck returns detailed information about a pingdom TMS check given its ID.
 func (cs *TmsCheckService) Read(id int) (*TmsCheckResponse, error) {
-	req, err := cs.client.NewRequest("GET", "/tms/checks/"+strconv.Itoa(id), nil)
+	req, err := cs.client.NewRequest("GET", "/tms/check/"+strconv.Itoa(id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +297,7 @@ func (cs *TmsCheckService) Update(id int, tmsCheck TmsCheck) (*TmsCheckResponse,
 
 // Delete will delete the TMS check for the given ID.
 func (cs *TmsCheckService) Delete(id int) (*PingdomResponse, error) {
-	req, err := cs.client.NewRequest("DELETE", "/tms/checks/"+strconv.Itoa(id), nil)
+	req, err := cs.client.NewRequest("DELETE", "/tms/check/"+strconv.Itoa(id), nil)
 	if err != nil {
 		return nil, err
 	}
