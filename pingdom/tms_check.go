@@ -26,7 +26,7 @@ type TmsCheck struct {
 	Region                   string            `json:"region,omitempty"`
 	SendNotificationWhenDown int               `json:"send_notification_when_down,omitempty"`
 	SeverityLevel            string            `json:"severity_level,omitempty"`
-	Tags                     string            `json:"tags,omitempty"`
+	Tags                     []string          `json:"tags,omitempty"`
 	TeamIds                  []int             `json:"team_ids,omitempty"`
 }
 
