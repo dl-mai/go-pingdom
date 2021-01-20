@@ -1,13 +1,13 @@
 package pingdom
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 const (
@@ -99,41 +99,24 @@ func (pc *Client) NewRequest(method string, rsc string, params map[string]string
 	return req, err
 }
 
-// NewJsonRequest makes a new HTTP Request with Json payload. The method param should be an HTTP method in
-// all caps such as GET, POST, PUT, DELETE. The rsc param should correspond with
-// a restful resource.  Params can be passed in as a map of strings
-// Usually users of the client can use one of the convenience methods such as
-// ListChecks, etc but this method is provided to allow for making other
-// API calls that might not be built in.
-func (pc *Client) NewJsonRequest(method string, rsc string, params map[string]string, body interface{}) (*http.Request, error) {
+
+// NewJSONRequest makes a new HTTP Request.  The method param should be an HTTP method in
+// all caps such as GET, POST, PUT, DELETE.  The rsc param should correspond with
+// a restful resource.  Params should be a json formatted string.
+func (pc *Client) NewJSONRequest(method string, rsc string, params string) (*http.Request, error) {
 	baseURL, err := url.Parse(pc.BaseURL.String() + rsc)
 	if err != nil {
 		return nil, err
 	}
 
-	if params != nil {
-		ps := url.Values{}
-		for k, v := range params {
-			ps.Set(k, v)
-		}
-		baseURL.RawQuery = ps.Encode()
-	}
-	jsonBody, err := json.Marshal(body)
+	reqBody := strings.NewReader(params)
 
-	//todo remove debug code
-	fmt.Println(string(jsonBody))
-
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(method, baseURL.String(), bytes.NewBuffer(jsonBody))
-	if req != nil {
-		req.Header.Add("Authorization", "Bearer "+pc.APIToken)
-		req.Header.Add("Content-Type", "application/json")
-	}
+	req, err := http.NewRequest(method, baseURL.String(), reqBody)
+	req.Header.Add("Authorization", "Bearer "+pc.APIToken)
+	req.Header.Add("Content-Type", "application/json")
 	return req, err
 }
+
 
 // Do makes an HTTP request and will unmarshal the JSON response in to the
 // passed in interface.  If the HTTP response is outside of the 2xx range the
