@@ -84,6 +84,19 @@ func (ts *TmsCheck) Valid() error {
 	//}
 	return nil
 }
+
+// RenderForJSONAPI returns the JSON formatted version of this object that may be submitted to Pingdom
+func (ts *TmsCheck) RenderForJSONAPI() string {
+	u := map[string]interface{}{
+		"name":  ts.Name,
+		"steps": ts.Steps,
+		"interval": ts.Interval,
+		"tags": ts.Tags,
+	}
+	jsonBody, _ := json.Marshal(u)
+	return string(jsonBody)
+}
+
 func (tr *TmsStatusReportListByIdRequest) Valid() error {
 	if tr.To != nil && tr.From != nil && tr.To.Before(*tr.From) {
 		return fmt.Errorf("from date should be earlier then to date")
@@ -245,17 +258,17 @@ func (cs *TmsCheckService) Create(check TmsCheck) (*TmsCheckResponse, error) {
 		return nil, err
 	}
 
-	req, err := cs.client.NewJsonRequest("POST", "/tms/check", nil, check)
+	req, err := cs.client.NewJSONRequest("POST", "/tms/check", check.RenderForJSONAPI())
 	if err != nil {
 		return nil, err
 	}
 
-	m := &TmsCheckResponse{}
+	m := &tmsCheckDetailsJSONResponse{}
 	_, err = cs.client.Do(req, m)
 	if err != nil {
 		return nil, err
 	}
-	return m, err
+	return m.TmsCheck, err
 }
 
 // ReadCheck returns detailed information about a pingdom TMS check given its ID.
@@ -282,17 +295,17 @@ func (cs *TmsCheckService) Update(id int, tmsCheck TmsCheck) (*TmsCheckResponse,
 		return nil, err
 	}
 
-	req, err := cs.client.NewJsonRequest("PUT", "/tms/checks/"+strconv.Itoa(id), nil, tmsCheck)
+	req, err := cs.client.NewJSONRequest("PUT", "/tms/check/"+strconv.Itoa(id), tmsCheck.RenderForJSONAPI())
 	if err != nil {
 		return nil, err
 	}
 
-	m := &TmsCheckResponse{}
+	m := &tmsCheckDetailsJSONResponse{}
 	_, err = cs.client.Do(req, m)
 	if err != nil {
 		return nil, err
 	}
-	return m, err
+	return m.TmsCheck, err
 }
 
 // Delete will delete the TMS check for the given ID.
