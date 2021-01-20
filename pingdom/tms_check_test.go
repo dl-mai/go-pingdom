@@ -57,8 +57,10 @@ func TestTmsCheckServiceCreate(t *testing.T) {
 	mux.HandleFunc("/tms/check", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
 		fmt.Fprint(w, `{
-		"id": 1003,
-		"name": "Test redirect"
+          "check": {
+		    "id": 1003,
+		    "name": "Test redirect"
+          }
 		}`)
 	})
 
@@ -161,71 +163,73 @@ func TestTmsCheckServiceUpdate(t *testing.T) {
 	mux.HandleFunc("/tms/check/12345", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
 		fmt.Fprint(w, `{
-  "active": true,
-  "contact_ids": [
-    12345678,
-    19876654
-  ],
-  "created_at": 1553070682,
-  "modified_at": 1553070968,
-  "custom_message": "My custom message",
-  "interval": 10,
-  "name": "Updated Check",
-  "region": "us-west",
-  "send_notification_when_down": 1,
-  "severity_level": "low",
-  "status": "successful",
-  "steps": [
-    {
-      "args": {
-        "checkbox": "string",
-        "element": "string",
-        "form": "string",
-        "input": "string",
-        "option": "string",
-        "password": "string",
-        "radio": "string",
-        "seconds": "string",
-        "select": "string",
-        "url": "http://www.google.com",
-        "username": "string",
-        "value": "string"
-      },
-      "fn": "go_to"
-    }
-  ],
-  "team_ids": [
-    12345678,
-    135790
-  ],
-  "integration_ids": [
-    1234,
-    1359
-  ],
-  "metadata": {
-    "width": 1950,
-    "height": 1080,
-    "disableWebSecurity": true,
-    "authentications": {
-      "httpAuthentications": [
-        {
-          "credentials": {
-            "password": "secret",
-            "userName": "admin"
-          },
-          "host": "https://example.com/auth"
-        }
-      ]
-    }
-  },
-  "tags": [
-    "tag1",
-    "tag2"
-  ],
-  "type": [
-    "script"
-  ]
-}`)
+          "check": {
+			"active": true,
+			"contact_ids": [
+			  12345678,
+			  19876654
+			],
+			"created_at": 1553070682,
+			"modified_at": 1553070968,
+			"custom_message": "My custom message",
+			"interval": 10,
+			"name": "Updated Check",
+			"region": "us-west",
+			"send_notification_when_down": 1,
+			"severity_level": "low",
+			"status": "successful",
+			"steps": [
+			  {
+				"args": {
+				  "checkbox": "string",
+				  "element": "string",
+				  "form": "string",
+				  "input": "string",
+				  "option": "string",
+				  "password": "string",
+				  "radio": "string",
+				  "seconds": "string",
+				  "select": "string",
+				  "url": "http://www.google.com",
+				  "username": "string",
+				  "value": "string"
+				},
+				"fn": "go_to"
+			  }
+			],
+			"team_ids": [
+			  12345678,
+			  135790
+			],
+			"integration_ids": [
+			  1234,
+			  1359
+			],
+			"metadata": {
+			  "width": 1950,
+			  "height": 1080,
+			  "disableWebSecurity": true,
+			  "authentications": {
+				"httpAuthentications": [
+				  {
+					"credentials": {
+					  "password": "secret",
+					  "userName": "admin"
+					},
+					"host": "https://example.com/auth"
+				  }
+				]
+			  }
+			},
+			"tags": [
+			  "tag1",
+			  "tag2"
+			],
+			"type": [
+			  "script"
+			]
+          }
+        }`)
 	})
 
 	updateCheck := TmsCheck{
