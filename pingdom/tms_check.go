@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,19 +16,19 @@ type TmsCheckService struct {
 
 // TmsCheck is an struct representing a TMS Check.
 type TmsCheck struct {
-	Name                     string            `json:"name"`
-	Steps                    []TmsStep         `json:"steps"`
-	Active                   bool              `json:"active,omitempty"`
-	ContactIds               []int             `json:"contact_ids,omitempty"`
-	CustomMessage            string            `json:"custom_message,omitempty"`
-	IntegrationIds           []int             `json:"integration_ids,omitempty"`
-	Interval                 int               `json:"interval,omitempty"`
-	Metadata                 map[string]string `json:"metadata,omitempty"`
-	Region                   string            `json:"region,omitempty"`
-	SendNotificationWhenDown int               `json:"send_notification_when_down,omitempty"`
-	SeverityLevel            string            `json:"severity_level,omitempty"`
-	Tags                     []string          `json:"tags,omitempty"`
-	TeamIds                  []int             `json:"team_ids,omitempty"`
+	ID                       int       `json:"id"`
+	Name                     string    `json:"name"`
+	Steps                    []TmsStep `json:"steps"`
+	Active                   bool      `json:"active,omitempty"`
+	ContactIds               []int     `json:"contact_ids,omitempty"`
+	CustomMessage            string    `json:"custom_message,omitempty"`
+	IntegrationIds           []int     `json:"integration_ids,omitempty"`
+	Interval                 int       `json:"interval,omitempty"`
+	Region                   string    `json:"region,omitempty"`
+	SendNotificationWhenDown int       `json:"send_notification_when_down,omitempty"`
+	SeverityLevel            string    `json:"severity_level,omitempty"`
+	Tags                     string    `json:"tags,omitempty"`
+	TeamIds                  []int     `json:"team_ids,omitempty"`
 }
 
 type TmsStep struct {
@@ -87,12 +88,26 @@ func (ts *TmsCheck) Valid() error {
 
 // RenderForJSONAPI returns the JSON formatted version of this object that may be submitted to Pingdom
 func (ts *TmsCheck) RenderForJSONAPI() string {
-	u := map[string]interface{}{
-		"name":  ts.Name,
-		"steps": ts.Steps,
-		"interval": ts.Interval,
-		"tags": ts.Tags,
+	tags := make([]string, 0)
+	for _, t := range strings.Split(ts.Tags, ",") {
+		tags = append(tags, strings.TrimSpace(t))
 	}
+
+	u := map[string]interface{}{
+		"name":                        ts.Name,
+		"steps":                       ts.Steps,
+		"active":                      ts.Active,
+		"contact_ids":                 ts.ContactIds,
+		"custom_message":              ts.CustomMessage,
+		"integration_ids":             ts.IntegrationIds,
+		"interval":                    ts.Interval,
+		"region":                      ts.Region,
+		"severity_level":              ts.SeverityLevel,
+		"send_notification_when_down": ts.SendNotificationWhenDown,
+		"tags":                        tags,
+		"team_ids":                    ts.TeamIds,
+	}
+
 	jsonBody, _ := json.Marshal(u)
 	return string(jsonBody)
 }
@@ -253,7 +268,7 @@ func (cs *TmsCheckService) List(params ...map[string]string) ([]TmsCheckResponse
 }
 
 // Create a new TMS check.
-func (cs *TmsCheckService) Create(check TmsCheck) (*TmsCheckResponse, error) {
+func (cs *TmsCheckService) Create(check *TmsCheck) (*TmsCheck, error) {
 	if err := check.Valid(); err != nil {
 		return nil, err
 	}
@@ -268,11 +283,12 @@ func (cs *TmsCheckService) Create(check TmsCheck) (*TmsCheckResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	return m.TmsCheck, err
+
+	return fromTmsCheckResponse(m.TmsCheck), nil
 }
 
 // ReadCheck returns detailed information about a pingdom TMS check given its ID.
-func (cs *TmsCheckService) Read(id int) (*TmsCheckResponse, error) {
+func (cs *TmsCheckService) Read(id int) (*TmsCheck, error) {
 	req, err := cs.client.NewRequest("GET", "/tms/check/"+strconv.Itoa(id), nil)
 	if err != nil {
 		return nil, err
@@ -284,13 +300,33 @@ func (cs *TmsCheckService) Read(id int) (*TmsCheckResponse, error) {
 		return nil, err
 	}
 
-	return m.TmsCheck, err
+	return fromTmsCheckResponse(m.TmsCheck), nil
+}
+
+func fromTmsCheckResponse(cr *TmsCheckResponse) *TmsCheck {
+	check := &TmsCheck{
+		ID:                       cr.ID,
+		Name:                     cr.Name,
+		Steps:                    cr.Steps,
+		Active:                   cr.Active,
+		ContactIds:               cr.ContactIds,
+		CustomMessage:            cr.CustomMessage,
+		IntegrationIds:           cr.IntegrationIds,
+		Interval:                 cr.Interval,
+		Region:                   cr.Region,
+		SendNotificationWhenDown: cr.SendNotificationWhenDown,
+		SeverityLevel:            cr.SeverityLevel,
+		Tags:                     strings.Join(cr.Tags, ","),
+		TeamIds:                  cr.TeamIds,
+	}
+
+	return check
 }
 
 // Update will update the TMS check represented by the given ID with the values
 // in the given check.  You should submit the complete list of values in
 // the given check parameter, not just those that have changed.
-func (cs *TmsCheckService) Update(id int, tmsCheck TmsCheck) (*TmsCheckResponse, error) {
+func (cs *TmsCheckService) Update(id int, tmsCheck TmsCheck) (*TmsCheck, error) {
 	if err := tmsCheck.Valid(); err != nil {
 		return nil, err
 	}
@@ -305,7 +341,7 @@ func (cs *TmsCheckService) Update(id int, tmsCheck TmsCheck) (*TmsCheckResponse,
 	if err != nil {
 		return nil, err
 	}
-	return m.TmsCheck, err
+	return fromTmsCheckResponse(m.TmsCheck), err
 }
 
 // Delete will delete the TMS check for the given ID.

@@ -64,12 +64,12 @@ func TestTmsCheckServiceCreate(t *testing.T) {
 		}`)
 	})
 
-	want := &TmsCheckResponse{
+	want := &TmsCheck{
 		ID:   1003,
 		Name: "Test redirect",
 	}
 
-	checks, err := client.TmsChecks.Create(TmsCheck{
+	checks, err := client.TmsChecks.Create(&TmsCheck{
 		Name: "Test redirect",
 		Steps: []TmsStep{
 			{
@@ -128,12 +128,12 @@ func TestTmsCheckServiceRead(t *testing.T) {
 }`)
 	})
 
-	want := &TmsCheckResponse{
+	want := &TmsCheck{
 		ID:                       85975,
 		Name:                     "TestRedirect",
 		SendNotificationWhenDown: 1,
 		TeamIds:                  []int{123456},
-		Tags:                     []string{},
+		Tags:                     "",
 		Active:                   true,
 		ContactIds:               []int{},
 		IntegrationIds:           []int{12345},
@@ -236,7 +236,7 @@ func TestTmsCheckServiceUpdate(t *testing.T) {
 		Name: "Updated Check",
 	}
 
-	want := &TmsCheckResponse{
+	want := &TmsCheck{
 		Name: "Updated Check",
 		Steps: []TmsStep{
 			{
@@ -257,31 +257,15 @@ func TestTmsCheckServiceUpdate(t *testing.T) {
 				},
 			},
 		},
-		Active:         true,
-		ContactIds:     []int{12345678, 19876654},
-		CustomMessage:  "My custom message",
-		IntegrationIds: []int{1234, 1359},
-		Interval:       10,
-		Metadata: map[string]interface{}{
-			"authentications": map[string]interface{}{
-				"httpAuthentications": []interface{}{
-					map[string]interface{}{
-						"credentials": map[string]interface{}{
-							"userName": "admin",
-							"password": "secret",
-						},
-						"host": "https://example.com/auth",
-					},
-				},
-			},
-			"width":              1950.,
-			"height":             1080.,
-			"disableWebSecurity": true,
-		},
+		Active:                   true,
+		ContactIds:               []int{12345678, 19876654},
+		CustomMessage:            "My custom message",
+		IntegrationIds:           []int{1234, 1359},
+		Interval:                 10,
 		Region:                   "us-west",
 		SendNotificationWhenDown: 1,
 		SeverityLevel:            "low",
-		Tags:                     []string{"tag1", "tag2"},
+		Tags:                     "tag1,tag2",
 		TeamIds:                  []int{12345678, 135790},
 	}
 
@@ -498,6 +482,7 @@ func TestTmsCheckPerformanceReportSingleTransactionCheck(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expectedResponse, *resp)
 }
+
 func TestTmsCheckServiceCreateReal(t *testing.T) {
 	// test client
 	client, _ = NewClientWithConfig(ClientConfig{
