@@ -253,3 +253,45 @@ func TestTeamAndContactConnections(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, delMsg)
 }
+
+func TestTMSCheck(t *testing.T) {
+	if !runAcceptance {
+		t.Skip()
+	}
+
+	newCheck := pingdom.NewTmsCheck(
+		"Test redirect",
+		[]pingdom.TmsStep{
+			{
+				Function: "go_to",
+				Args:     map[string]string{"url": "https://example.com/"},
+			},
+			{
+				Function: "url",
+				Args:     map[string]string{"url": "https://example.com/redirected"},
+			},
+		},
+	)
+
+	newCheck.Interval = 1440
+	newCheck.Tags = "foo1,foo2"
+
+	checkResponse, err := client.TmsChecks.Create(newCheck)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "Test redirect", checkResponse.Name)
+
+	check, err := client.TmsChecks.Read(checkResponse.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, true, check.Active)
+	assert.Equal(t, 1440, check.Interval)
+	assert.Equal(t, "foo1,foo2", check.Tags)
+
+	newCheck.Interval = 10
+	up, err := client.TmsChecks.Update(check.ID, newCheck)
+	assert.NoError(t, err)
+	assert.Equal(t, 10, up.Interval)
+
+	_, err = client.TmsChecks.Delete(check.ID)
+	assert.NoError(t, err)
+}
