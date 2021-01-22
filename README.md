@@ -305,6 +305,68 @@ result, err := client.Contacts.Delete(contactId)
 fmt.Println(result.Message)
 ```
 
+### TmsCheckService ###
+
+This service manages TMS (transactional) checks. Only "script" type checks with explicitly
+defined steps are supported. More information from Pingdom: https://docs.pingdom.com/api/#tag/TMS-Checks
+
+Get all TMS checks:
+
+```go
+checks, err := client.TmsChecks.List()
+fmt.Println(checks)
+```
+
+Create a new TMS check:
+
+```go
+check := TmsCheck{
+		Name: "Visit www.google.com",
+		Steps: []TmsStep{
+			{
+				Function: "go_to",
+				Args:     map[string]string{"url": "https://www.google.com"},
+			}
+		},
+		Interval: 10,
+		Region: "us-west",
+		SeverityLevel: "low",
+		SendNotificationWhenDown: 1,
+	}
+}
+
+newCheck, err := client.TmsChecks.Create(check)
+fmt.Println("New TMS Check ID: ", newCheck.ID)
+```
+
+If you want to use Pingdom's default values for `Interval`, `Region`, `SeverityLevel` and `SendNotificationWhenDown` you can also use a helper constructor function:
+
+```go
+check := NewTmsCheck("Visit www.google.com", []TmsStep{
+    {
+        Function: "go_to",
+        Args:     map[string]string{"url": "https://www.google.com"},
+    }
+})
+```
+
+Update a TMS check:
+
+```go
+checkId := 1234
+check := client.TmsChecks.Read(checkId)
+check.Interval = 1440
+updatedCheck, err := client.TmsChecks.Update(checkId, check)
+```
+
+Delete a TMS check:
+
+```go
+checkId := 1234
+result, err := client.TmsChecks.Delete(checkId)
+fmt.Println(result.Message)
+```
+
 ## Development ##
 
 ### Acceptance Tests ###
