@@ -256,10 +256,8 @@ func (tr *TmsPerformanceReportRequest) GetParams() map[string]string {
 	return m
 }
 
-// List returns a list of TMD checks from Pingdom.
-// This returns type TmsCheckResponse rather than TMSCheck since the
-// Pingdom API does not return a complete representation of a check.
-func (cs *TmsCheckService) List(params ...map[string]string) ([]TmsCheckResponse, error) {
+// List returns a list of TMS checks from Pingdom.
+func (cs *TmsCheckService) List(params ...map[string]string) ([]TmsCheck, error) {
 	param := map[string]string{}
 	if len(params) == 1 {
 		param = params[0]
@@ -284,7 +282,13 @@ func (cs *TmsCheckService) List(params ...map[string]string) ([]TmsCheckResponse
 	m := &listTmsChecksJSONResponse{}
 	err = json.Unmarshal([]byte(bodyString), &m)
 
-	return m.TmsChecks, err
+	checks := make([]TmsCheck, 0)
+
+	for _, cr := range m.TmsChecks {
+		checks = append(checks, *fromTmsCheckResponse(&cr))
+	}
+
+	return checks, nil
 }
 
 // Create a new TMS check.

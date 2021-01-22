@@ -27,14 +27,14 @@ func TestTmsCheckServiceList(t *testing.T) {
             "interval": 10,
             "region": "au",
             "modified_at": 1599061779,
-            "tags": []
+            "tags": ["foo1", "foo2"]
         }
     ],
     "limit": 1000,
     "offset": 0
 }`)
 	})
-	want := []TmsCheckResponse{
+	want := []TmsCheck{
 		{
 			ID:                       84591,
 			Name:                     "TestLoginRedirect",
@@ -42,7 +42,7 @@ func TestTmsCheckServiceList(t *testing.T) {
 			Interval:                 10,
 			Region:                   "au",
 			SendNotificationWhenDown: 0,
-			Tags:                     []string{},
+			Tags:                     "foo1,foo2",
 		},
 	}
 
