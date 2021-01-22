@@ -346,7 +346,7 @@ func fromTmsCheckResponse(cr *TmsCheckResponse) *TmsCheck {
 // Update will update the TMS check represented by the given ID with the values
 // in the given check.  You should submit the complete list of values in
 // the given check parameter, not just those that have changed.
-func (cs *TmsCheckService) Update(id int, tmsCheck TmsCheck) (*TmsCheck, error) {
+func (cs *TmsCheckService) Update(id int, tmsCheck *TmsCheck) (*TmsCheck, error) {
 	if err := tmsCheck.Valid(); err != nil {
 		return nil, err
 	}

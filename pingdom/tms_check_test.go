@@ -276,7 +276,7 @@ func TestTmsCheckServiceUpdate(t *testing.T) {
 		TeamIds:                  []int{12345678, 135790},
 	}
 
-	msg, err := client.TmsChecks.Update(12345, updateCheck)
+	msg, err := client.TmsChecks.Update(12345, &updateCheck)
 	assert.NoError(t, err)
 	assert.Equal(t, want, msg)
 }
