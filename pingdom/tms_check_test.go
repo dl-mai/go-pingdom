@@ -241,6 +241,7 @@ func TestTmsCheckServiceUpdate(t *testing.T) {
 		Interval:      10,
 		Region:        "us-west",
 		SeverityLevel: "low",
+		SendNotificationWhenDown: 1,
 	}
 
 	want := &TmsCheck{
