@@ -68,6 +68,22 @@ type TmsPerformanceReportRequest struct {
 	Resolution    Resolution
 }
 
+func NewTmsCheck(name string, steps []TmsStep) *TmsCheck {
+	check := &TmsCheck{
+		Name:  name,
+		Steps: steps,
+	}
+
+	// Defaults of the Pingdom TMS Check API
+	check.Active = true
+	check.Interval = 10
+	check.Region = "us-east"
+	check.SeverityLevel = "high"
+	check.SendNotificationWhenDown = 1
+
+	return check
+}
+
 // Valid determines whether the TmsCheck contains valid fields. This can be
 // used to guard against sending illegal values to the Pingdom API.
 func (ts *TmsCheck) Valid() error {
@@ -75,14 +91,18 @@ func (ts *TmsCheck) Valid() error {
 		return fmt.Errorf("Invalid value for `Name`.  Must contain non-empty string")
 	}
 
-	//if ts.Hostname == "" {
-	//	return fmt.Errorf("Invalid value for `Hostname`.  Must contain non-empty string")
-	//}
-	//
-	//if ts.Resolution != 1 && ts.Resolution != 5 && ts.Resolution != 15 &&
-	//	ts.Resolution != 30 && ts.Resolution != 60 {
-	//	return fmt.Errorf("invalid value %v for `Resolution`, allowed values are [1,5,15,30,60]", ts.Resolution)
-	//}
+	if ts.Region != "us-east" && ts.Region != "us-west" && ts.Region != "eu" && ts.Region != "au" {
+		return fmt.Errorf("invalid value %v for `Region`, allowed values are [\"us-east\", \"us-west\", \"eu\", \"au\"]", ts.Region)
+	}
+
+	if ts.SeverityLevel != "high" && ts.SeverityLevel != "low" {
+		return fmt.Errorf("invalid value %v for `SeverityLevel`, allowed values are [\"low\", \"high\"]", ts.SeverityLevel)
+	}
+
+	if ts.Interval != 5 && ts.Interval != 10 && ts.Interval != 20 && ts.Interval != 60 && ts.Interval != 720 && ts.Interval != 1440 {
+		return fmt.Errorf("invalid value %v for `Interval`, allowed values are [5,10,20,60,720,1440]", ts.Interval)
+	}
+
 	return nil
 }
 

@@ -80,7 +80,11 @@ func TestTmsCheckServiceCreate(t *testing.T) {
 				Function: "url",
 				Args:     map[string]string{"url": "https://example.com/redirected"},
 			},
-		}})
+		},
+		Region:        "eu",
+		Interval:      10,
+		SeverityLevel: "high",
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, want, checks)
 }
@@ -233,7 +237,10 @@ func TestTmsCheckServiceUpdate(t *testing.T) {
 	})
 
 	updateCheck := TmsCheck{
-		Name: "Updated Check",
+		Name:          "Updated Check",
+		Interval:      10,
+		Region:        "us-west",
+		SeverityLevel: "low",
 	}
 
 	want := &TmsCheck{
@@ -491,14 +498,9 @@ func TestTmsCheckServiceCreateReal(t *testing.T) {
 
 	defer teardown()
 
-	want := &TmsCheckResponse{
-		ID:   1003,
-		Name: "Test redirect",
-	}
-
-	checks, err := client.TmsChecks.Create(TmsCheck{
-		Name: "Test redirect",
-		Steps: []TmsStep{
+	newCheck := NewTmsCheck(
+		"Test redirect",
+		[]TmsStep{
 			{
 				Function: "go_to",
 				Args:     map[string]string{"url": "https://example.com/"},
@@ -507,7 +509,23 @@ func TestTmsCheckServiceCreateReal(t *testing.T) {
 				Function: "url",
 				Args:     map[string]string{"url": "https://example.com/redirected"},
 			},
-		}})
+		},
+	)
+
+	newCheck.Interval = 1440
+	newCheck.Tags = "foo1,foo2"
+
+	checkResponse, err := client.TmsChecks.Create(newCheck)
 	assert.NoError(t, err)
-	assert.Equal(t, want, checks)
+
+	assert.Equal(t, "Test redirect", checkResponse.Name)
+
+	check, err := client.TmsChecks.Read(checkResponse.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, true, check.Active)
+	assert.Equal(t, 1440, check.Interval)
+	assert.Equal(t, "foo1,foo2", check.Tags)
+
+	_, err = client.TmsChecks.Delete(check.ID)
+	assert.NoError(t, err)
 }
