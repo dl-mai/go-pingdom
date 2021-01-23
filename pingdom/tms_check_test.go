@@ -237,10 +237,10 @@ func TestTmsCheckServiceUpdate(t *testing.T) {
 	})
 
 	updateCheck := TmsCheck{
-		Name:          "Updated Check",
-		Interval:      10,
-		Region:        "us-west",
-		SeverityLevel: "low",
+		Name:                     "Updated Check",
+		Interval:                 10,
+		Region:                   "us-west",
+		SeverityLevel:            "low",
 		SendNotificationWhenDown: 1,
 	}
 
